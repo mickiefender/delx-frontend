@@ -3,9 +3,19 @@
 import { useEffect, useState } from 'react'
 import { useAuthStore } from '@/lib/store/auth'
 
+const rawApiBaseUrl = process.env.NEXT_PUBLIC_API_URL
 const API_BASE_URL =
-  process.env.NEXT_PUBLIC_API_URL ||
-  (typeof window !== 'undefined' ? `${window.location.origin}/api/v1` : '')
+  rawApiBaseUrl && typeof rawApiBaseUrl === 'string'
+    ? rawApiBaseUrl.startsWith('http')
+      ? rawApiBaseUrl.endsWith('/api/v1')
+        ? rawApiBaseUrl
+        : rawApiBaseUrl.endsWith('/')
+          ? `${rawApiBaseUrl}api/v1`
+          : `${rawApiBaseUrl}/api/v1`
+      : `https://${rawApiBaseUrl}${rawApiBaseUrl.endsWith('/api/v1') ? '' : '/api/v1'}`
+    : typeof window !== 'undefined'
+      ? `${window.location.origin}/api/v1`
+      : ''
 
 interface LoginResponse {
   user: {
