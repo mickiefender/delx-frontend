@@ -5,6 +5,8 @@ import { Star, Heart, ShoppingCart, Flame, Sparkles, Tag } from 'lucide-react'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { fetchProductsByCollection, ProductListItem, ProductCollection } from '@/lib/services/products'
+import { useCartStore } from '@/lib/store/cart'
+import { useWishlistStore, type WishlistItem } from '@/lib/store/wishlist'
 
 type CollectionTab = {
   id: ProductCollection
@@ -38,6 +40,13 @@ export function CollectionSection() {
   const [activeTab, setActiveTab] = useState<ProductCollection>('best_seller')
   const [products, setProducts] = useState<ProductListItem[]>([])
   const [loading, setLoading] = useState(true)
+
+  const wishlistItems = useWishlistStore((s) => s.items)
+  const toggleWishlistItem = useWishlistStore((s) => s.toggleItem)
+
+  const cartItems = useCartStore((s) => s.items)
+  const addItem = useCartStore((s) => s.addItem)
+  const removeItem = useCartStore((s) => s.removeItem)
 
   useEffect(() => {
     const loadProducts = async () => {
@@ -128,7 +137,38 @@ export function CollectionSection() {
       ) : (
         <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           {products.slice(0, 8).map((product, index) => (
-            <ProductCard key={product.id} product={product} index={index} />
+            <ProductCard
+              key={product.id}
+              product={product}
+              index={index}
+              isWishlisted={wishlistItems.some((w) => w.productId === product.id)}
+              isInCart={cartItems.some((i) => i.productId === String(product.id))}
+              onToggleWishlist={() => {
+                const item: WishlistItem = {
+                  productId: product.id,
+                  name: product.name,
+                  image: product.image,
+                  price: Number(product.price),
+                  createdAt: new Date().toISOString(),
+                }
+                toggleWishlistItem(item)
+              }}
+              onToggleCart={() => {
+                const inCart = cartItems.some((i) => i.productId === String(product.id))
+                if (inCart) removeItem(String(product.id))
+                else {
+                  addItem({
+                    id: `${product.id}`,
+                    productId: String(product.id),
+                    variantId: undefined,
+                    name: product.name,
+                    image: product.image,
+                    price: Number(product.price),
+                    quantity: 1,
+                  })
+                }
+              }}
+            />
           ))}
         </div>
       )}
@@ -147,7 +187,21 @@ export function CollectionSection() {
   )
 }
 
-function ProductCard({ product, index }: { product: ProductListItem; index: number }) {
+function ProductCard({
+  product,
+  index,
+  isWishlisted,
+  isInCart,
+  onToggleWishlist,
+  onToggleCart,
+}: {
+  product: ProductListItem
+  index: number
+  isWishlisted: boolean
+  isInCart: boolean
+  onToggleWishlist: () => void
+  onToggleCart: () => void
+}) {
   const price = Number(product.price)
   const originalPrice = product.original_price ? Number(product.original_price) : null
   const discount =
@@ -206,16 +260,39 @@ function ProductCard({ product, index }: { product: ProductListItem; index: numb
             </div>
           )}
 
-          {/* Hover Actions */}
-          <div className="absolute inset-x-0 bottom-0 p-3 bg-gradient-to-t from-black/70 to-transparent translate-y-full group-hover:translate-y-0 transition-transform duration-300">
+          {/* Actions: visible on mobile, hover-only on lg+ */}
+          <div className="absolute inset-x-0 bottom-0 p-3 bg-gradient-to-t from-black/70 to-transparent transition-transform duration-300 translate-y-0 lg:translate-y-full lg:opacity-100 lg:group-hover:translate-y-0">
             <div className="flex gap-2">
-              <button className="flex-1 bg-white/90 hover:bg-white text-gray-900 py-1.5 px-2 rounded-lg text-[12px] font-medium transition-colors flex items-center justify-center gap-2">
-                <Heart className="w-3.5 h-3.5" />
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.preventDefault()
+                  e.stopPropagation()
+                  onToggleWishlist()
+                }}
+                className={`flex-1 py-1.5 px-2 rounded-lg text-[12px] font-medium transition-colors flex items-center justify-center gap-2 ${
+                  isWishlisted ? 'bg-destructive text-destructive-foreground' : 'bg-white/90 hover:bg-white text-gray-900'
+                }`}
+                aria-label="Wishlist"
+              >
+                <Heart className={`w-3.5 h-3.5 ${isWishlisted ? 'fill-current' : ''}`} />
                 Wishlist
               </button>
-              <button className="flex-1 bg-accent hover:bg-accent/90 text-accent-foreground py-1.5 px-2 rounded-lg text-[12px] font-medium transition-colors flex items-center justify-center gap-2">
-                <ShoppingCart className="w-3.5 h-3.5" />
-                Add
+
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.preventDefault()
+                  e.stopPropagation()
+                  onToggleCart()
+                }}
+                className={`flex-1 py-1.5 px-2 rounded-lg text-[12px] font-medium transition-colors flex items-center justify-center gap-2 ${
+                  isInCart ? 'bg-accent/90 text-accent-foreground' : 'bg-accent hover:bg-accent/90 text-accent-foreground'
+                }`}
+                aria-label="Add to cart"
+              >
+                <ShoppingCart className={`w-3.5 h-3.5 ${isInCart ? 'text-white' : ''}`} />
+                {isInCart ? 'Remove' : 'Add'}
               </button>
             </div>
           </div>

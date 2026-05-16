@@ -3,14 +3,23 @@
 import { useEffect, useMemo, useState, useRef } from 'react'
 import { Star, Heart, ShoppingCart, ChevronLeft, ChevronRight } from 'lucide-react'
 import Link from 'next/link'
+import { fetchStoreProducts, type ProductListItem } from '@/lib/services/products'
+import { useCartStore } from '@/lib/store/cart'
+import { useWishlistStore, type WishlistItem } from '@/lib/store/wishlist'
 import { Button } from '@/components/ui/button'
-import { fetchStoreProducts, ProductListItem } from '@/lib/services/products'
 
 export function FeaturedProducts() {
   const [products, setProducts] = useState<ProductListItem[]>([])
   const [loading, setLoading] = useState(true)
   const scrollRef1 = useRef<HTMLDivElement>(null)
   const scrollRef2 = useRef<HTMLDivElement>(null)
+
+  const wishlistItems = useWishlistStore((s) => s.items)
+  const toggleWishlistItem = useWishlistStore((s) => s.toggleItem)
+
+  const cartItems = useCartStore((s) => s.items)
+  const addItem = useCartStore((s) => s.addItem)
+  const removeItem = useCartStore((s) => s.removeItem)
 
   useEffect(() => {
     const loadProducts = async () => {
@@ -35,14 +44,49 @@ export function FeaturedProducts() {
   const row1Products = useMemo(() => featuredProducts.slice(0, 6), [featuredProducts])
   const row2Products = useMemo(() => featuredProducts.slice(6, 12), [featuredProducts])
 
-  const scroll = (ref: React.RefObject<HTMLDivElement | null>, direction: 'left' | 'right') => {
-    if (ref.current) {
-      const scrollAmount = 320
-      ref.current.scrollBy({
-        left: direction === 'left' ? -scrollAmount : scrollAmount,
-        behavior: 'smooth',
-      })
+  const scroll = (
+    ref: React.RefObject<HTMLDivElement | null>,
+    direction: 'left' | 'right'
+  ) => {
+    if (!ref.current) return
+    const scrollAmount = 320
+    ref.current.scrollBy({
+      left: direction === 'left' ? -scrollAmount : scrollAmount,
+      behavior: 'smooth',
+    })
+  }
+
+  const isWishlisted = (productId: number) =>
+    wishlistItems.some((w) => w.productId === productId)
+
+  const isInCart = (productId: number) =>
+    cartItems.some((i) => i.productId === String(productId))
+
+  const makeCartItem = (product: ProductListItem) => ({
+    id: `${product.id}`,
+    productId: String(product.id),
+    variantId: undefined,
+    name: product.name,
+    image: product.image,
+    price: Number(product.price),
+    quantity: 1,
+  })
+
+  const toggleWishlistForProduct = (product: ProductListItem) => {
+    const item: WishlistItem = {
+      productId: product.id,
+      name: product.name,
+      image: product.image,
+      price: Number(product.price),
+      createdAt: new Date().toISOString(),
     }
+    toggleWishlistItem(item)
+  }
+
+  const toggleCartForProduct = (product: ProductListItem) => {
+    const inCart = isInCart(product.id)
+    if (inCart) removeItem(String(product.id))
+    else addItem(makeCartItem(product))
   }
 
   return (
@@ -70,15 +114,24 @@ export function FeaturedProducts() {
                 style={{ scrollBehavior: 'smooth' }}
               >
                 {row1Products.map((product) => (
-                  <ProductCard key={product.id} product={product} />
+                  <ProductCard
+                    key={product.id}
+                    product={product}
+                    isWishlisted={isWishlisted(product.id)}
+                    isInCart={isInCart(product.id)}
+                    onToggleWishlist={() => toggleWishlistForProduct(product)}
+                    onToggleCart={() => toggleCartForProduct(product)}
+                  />
                 ))}
               </div>
+
               <button
                 onClick={() => scroll(scrollRef1, 'left')}
                 className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-12 bg-primary text-primary-foreground p-2 rounded-full hover:bg-accent transition-colors z-10 hidden md:flex items-center justify-center"
               >
                 <ChevronLeft className="w-5 h-5" />
               </button>
+
               <button
                 onClick={() => scroll(scrollRef1, 'right')}
                 className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-12 bg-primary text-primary-foreground p-2 rounded-full hover:bg-accent transition-colors z-10 hidden md:flex items-center justify-center"
@@ -97,15 +150,24 @@ export function FeaturedProducts() {
                 style={{ scrollBehavior: 'smooth' }}
               >
                 {row2Products.map((product) => (
-                  <ProductCard key={product.id} product={product} />
+                  <ProductCard
+                    key={product.id}
+                    product={product}
+                    isWishlisted={isWishlisted(product.id)}
+                    isInCart={isInCart(product.id)}
+                    onToggleWishlist={() => toggleWishlistForProduct(product)}
+                    onToggleCart={() => toggleCartForProduct(product)}
+                  />
                 ))}
               </div>
+
               <button
                 onClick={() => scroll(scrollRef2, 'left')}
                 className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-12 bg-primary text-primary-foreground p-2 rounded-full hover:bg-accent transition-colors z-10 hidden md:flex items-center justify-center"
               >
                 <ChevronLeft className="w-5 h-5" />
               </button>
+
               <button
                 onClick={() => scroll(scrollRef2, 'right')}
                 className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-12 bg-primary text-primary-foreground p-2 rounded-full hover:bg-accent transition-colors z-10 hidden md:flex items-center justify-center"
@@ -129,13 +191,23 @@ export function FeaturedProducts() {
   )
 }
 
-function ProductCard({ product }: { product: ProductListItem }) {
+function ProductCard({
+  product,
+  isWishlisted,
+  isInCart,
+  onToggleWishlist,
+  onToggleCart,
+}: {
+  product: ProductListItem
+  isWishlisted: boolean
+  isInCart: boolean
+  onToggleWishlist: () => void
+  onToggleCart: () => void
+}) {
   const price = Number(product.price)
   const originalPrice = product.original_price ? Number(product.original_price) : null
   const discount =
-    originalPrice && originalPrice > price
-      ? Math.round(((originalPrice - price) / originalPrice) * 100)
-      : 0
+    originalPrice && originalPrice > price ? Math.round(((originalPrice - price) / originalPrice) * 100) : 0
 
   return (
     <Link href={`/products/${product.slug}`} className="group flex-shrink-0 w-64">
@@ -143,11 +215,11 @@ function ProductCard({ product }: { product: ProductListItem }) {
         {/* Image Container */}
         <div className="relative h-52 bg-muted overflow-hidden flex items-center justify-center flex-shrink-0">
           {product.image ? (
-              <img
-                src={product.image}
-                alt={product.name}
-                className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-300"
-              />
+            <img
+              src={product.image}
+              alt={product.name}
+              className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-300"
+            />
           ) : (
             <div className="text-5xl">🛍️</div>
           )}
@@ -159,13 +231,34 @@ function ProductCard({ product }: { product: ProductListItem }) {
             </div>
           )}
 
-          {/* Hover Actions */}
-          <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-colors flex items-end justify-end p-4 gap-2 opacity-0 group-hover:opacity-100">
-            <button className="bg-card hover:bg-primary text-foreground hover:text-primary-foreground p-2 rounded-lg transition-colors">
-              <Heart className="w-5 h-5" />
+          {/* Actions: visible on mobile, hover-only on lg+ */}
+          <div className="absolute inset-0 bg-black/0 lg:group-hover:bg-black/40 transition-colors flex items-end justify-end p-4 gap-2 opacity-100 lg:opacity-0 lg:group-hover:opacity-100">
+            <button
+              type="button"
+              onClick={(e) => {
+                e.preventDefault()
+                e.stopPropagation()
+                onToggleWishlist()
+              }}
+              className={`p-2 rounded-lg transition-colors ${
+                isWishlisted ? 'bg-destructive text-destructive-foreground' : 'bg-card hover:bg-primary text-foreground hover:text-primary-foreground'
+              }`}
+              aria-label="Wishlist"
+            >
+              <Heart className={`w-5 h-5 ${isWishlisted ? 'fill-current' : ''}`} />
             </button>
-            <button className="bg-primary text-primary-foreground hover:bg-accent p-2 rounded-lg transition-colors">
-              <ShoppingCart className="w-5 h-5" />
+
+            <button
+              type="button"
+              onClick={(e) => {
+                e.preventDefault()
+                e.stopPropagation()
+                onToggleCart()
+              }}
+              className={`p-2 rounded-lg transition-colors bg-primary text-primary-foreground hover:bg-accent ${isInCart ? 'opacity-100' : ''}`}
+              aria-label="Add to cart"
+            >
+              <ShoppingCart className={`w-5 h-5 ${isInCart ? 'text-white' : ''}`} />
             </button>
           </div>
         </div>
@@ -184,9 +277,7 @@ function ProductCard({ product }: { product: ProductListItem }) {
                 <Star
                   key={i}
                   className={`w-3.5 h-3.5 ${
-                    i < Math.round(Number(product.rating))
-                      ? 'fill-accent text-accent'
-                      : 'text-muted-foreground'
+                    i < Math.round(Number(product.rating)) ? 'fill-accent text-accent' : 'text-muted-foreground'
                   }`}
                 />
               ))}
@@ -200,9 +291,7 @@ function ProductCard({ product }: { product: ProductListItem }) {
           <div className="flex items-baseline gap-2 mt-auto">
             <span className="text-base font-semibold">GHS {price}</span>
             {originalPrice && originalPrice > price && (
-              <span className="text-xs text-muted-foreground line-through">
-                GHS {originalPrice}
-              </span>
+              <span className="text-xs text-muted-foreground line-through">GHS {originalPrice}</span>
             )}
           </div>
         </div>

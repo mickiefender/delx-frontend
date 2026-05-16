@@ -39,16 +39,23 @@ export async function POST(request: NextRequest) {
       body: JSON.stringify(createOrderPayload),
     })
 
-    const createOrderJson = await createOrderRes.json()
+    const createOrderText = await createOrderRes.text()
+    const createOrderLooksJson = createOrderText.trim().startsWith('{') || createOrderText.trim().startsWith('[')
+    const createOrderJson = createOrderLooksJson ? JSON.parse(createOrderText) : null
 
     if (!createOrderRes.ok) {
       return NextResponse.json(
-        { error: createOrderJson?.error || 'Failed to create order', details: createOrderJson },
+        {
+          error: createOrderJson?.error || 'Failed to create order',
+          details: createOrderJson ?? { raw: createOrderText.slice(0, 500) },
+          status: createOrderRes.status,
+          url: ordersUrl,
+        },
         { status: createOrderRes.status || 400 }
       )
     }
 
-    const createdOrder = createOrderJson
+    const createdOrder = createOrderJson ?? {}
     const paystackReference = createdOrder?.order_id || orderId
 
     // Validate amount (Paystack works in kobo - smallest currency unit)
@@ -81,11 +88,23 @@ export async function POST(request: NextRequest) {
       }),
     })
 
-    const paystackData = await paystackResponse.json()
+    const paystackText = await paystackResponse.text()
+    const paystackLooksJson =
+      paystackText.trim().startsWith('{') || paystackText.trim().startsWith('[')
+
+    const paystackData = paystackLooksJson
+      ? JSON.parse(paystackText)
+      : null
 
     if (!paystackResponse.ok) {
       return NextResponse.json(
-        { error: paystackData.message || 'Failed to initialize payment' },
+        {
+          error:
+            paystackData?.message ||
+            'Failed to initialize payment',
+          raw:
+            paystackLooksJson ? paystackData : paystackText.slice(0, 500),
+        },
         { status: paystackResponse.status }
       )
     }

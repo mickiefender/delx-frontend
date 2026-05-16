@@ -41,11 +41,10 @@ export class PaymentService {
 
       const authToken = localStorage.getItem('auth_token')
 
-      const response = await fetch('/api/payments/initialize', {
+      const response = await fetch('/api/payments/initialize/', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          ...(authToken ? { Authorization: `Token ${authToken}` } : {}),
         },
         body: JSON.stringify({
           email,
@@ -58,9 +57,21 @@ export class PaymentService {
         }),
       })
 
-      const data = (await response.json()) as InitializePaymentResponse & { details?: unknown }
+      const text = await response.text()
+      const looksLikeJson = text.trim().startsWith('{') || text.trim().startsWith('[')
+
+      const data = looksLikeJson
+        ? (JSON.parse(text) as InitializePaymentResponse & { details?: unknown })
+        : null
 
       if (!response.ok) {
+        if (!data) {
+          return {
+            success: false,
+            error: `Payment initialize failed (non-JSON response): ${text.slice(0, 300)}`,
+          }
+        }
+
         const detailsPart = data.details ? `: ${JSON.stringify(data.details)}` : ''
         return {
           success: false,
@@ -68,7 +79,7 @@ export class PaymentService {
         }
       }
 
-      return data
+      return (data ?? { success: false, error: 'Unexpected empty response' })
     } catch (error) {
       return {
         success: false,
@@ -85,25 +96,27 @@ export class PaymentService {
     try {
       const authToken = localStorage.getItem('auth_token')
 
-      const response = await fetch('/api/payments/verify', {
+      const response = await fetch('/api/payments/verify/', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          ...(authToken ? { Authorization: `Token ${authToken}` } : {}),
         },
         body: JSON.stringify({ reference }),
       })
 
-      const data = (await response.json()) as VerifyPaymentResponse
+      const text = await response.text()
+      const looksLikeJson = text.trim().startsWith('{') || text.trim().startsWith('[')
+
+      const data = looksLikeJson ? (JSON.parse(text) as VerifyPaymentResponse) : null
 
       if (!response.ok) {
         return {
           success: false,
-          error: data.error || 'Failed to verify payment',
+          error: data?.error || `Payment verify failed (non-JSON response): ${text.slice(0, 300)}`,
         }
       }
 
-      return data
+      return data ?? { success: false, error: 'Unexpected empty response' }
     } catch (error) {
       return {
         success: false,
