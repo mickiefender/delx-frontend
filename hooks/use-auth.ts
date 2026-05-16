@@ -62,8 +62,18 @@ export function useAuth() {
       })
 
       if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}))
-        throw new Error(errorData.error || 'Invalid credentials')
+        const contentType = response.headers.get('content-type') || ''
+        let message = `Request failed (${response.status})`
+
+        if (contentType.includes('application/json')) {
+          const errorData = await response.json().catch(() => ({}))
+          message = errorData?.error || errorData?.detail || message
+        } else {
+          const text = await response.text().catch(() => '')
+          if (text) message = text.slice(0, 500)
+        }
+
+        throw new Error(message)
       }
 
       const data: LoginResponse = await response.json()
