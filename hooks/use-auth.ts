@@ -3,19 +3,7 @@
 import { useEffect, useState } from 'react'
 import { useAuthStore } from '@/lib/store/auth'
 
-const rawApiBaseUrl = process.env.NEXT_PUBLIC_API_URL
-const API_BASE_URL =
-  rawApiBaseUrl && typeof rawApiBaseUrl === 'string'
-    ? rawApiBaseUrl.startsWith('http')
-      ? rawApiBaseUrl.endsWith('/api/v1')
-        ? rawApiBaseUrl
-        : rawApiBaseUrl.endsWith('/')
-          ? `${rawApiBaseUrl}api/v1`
-          : `${rawApiBaseUrl}/api/v1`
-      : `https://${rawApiBaseUrl}${rawApiBaseUrl.endsWith('/api/v1') ? '' : '/api/v1'}`
-    : typeof window !== 'undefined'
-      ? `${window.location.origin}/api/v1`
-      : ''
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api/v1'
 
 interface LoginResponse {
   user: {
@@ -63,7 +51,7 @@ export function useAuth() {
       setLoading(true)
       setError(null)
 
-      const response = await fetch(`${API_BASE_URL}/users/login`, {
+      const response = await fetch(`${API_BASE_URL}/users/login/`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -72,18 +60,8 @@ export function useAuth() {
       })
 
       if (!response.ok) {
-        const contentType = response.headers.get('content-type') || ''
-        let message = `Request failed (${response.status})`
-
-        if (contentType.includes('application/json')) {
-          const errorData = await response.json().catch(() => ({}))
-          message = errorData?.error || errorData?.detail || message
-        } else {
-          const text = await response.text().catch(() => '')
-          if (text) message = text.slice(0, 500)
-        }
-
-        throw new Error(message)
+        const errorData = await response.json().catch(() => ({}))
+        throw new Error(errorData.error || 'Invalid credentials')
       }
 
       const data: LoginResponse = await response.json()
@@ -112,7 +90,7 @@ export function useAuth() {
       // Call logout endpoint if token exists
       if (token) {
         try {
-          await fetch(`${API_BASE_URL}/users/logout`, {
+          await fetch(`${API_BASE_URL}/users/logout/`, {
             method: 'POST',
             headers: {
               'Authorization': `Token ${token}`,
