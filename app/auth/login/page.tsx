@@ -97,7 +97,7 @@ void loadLogo()
             )}
           </Link>
           <h1 className="text-3xl font-semibold mb-2">Welcome Back</h1>
-          <p className="text-muted-foreground">Sign in to your Delchris account</p>
+          <p className="text-muted-foreground">Sign in to your Delx account</p>
         </div>
 
         {/* Form */}

@@ -155,6 +155,62 @@ export function useAuth() {
     }
   }
 
+  const forgotPassword = async (email: string) => {
+    try {
+      setLoading(true)
+      setError(null)
+
+      const response = await fetch(`${API_BASE_URL}/users/forgot_password/`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email }),
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}))
+        throw new Error(errorData.error || 'Failed to request password reset')
+      }
+
+      const data = await response.json()
+      return data
+    } catch (error) {
+      console.error('Forgot password error:', error)
+      throw error
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const resetPassword = async (token: string, password: string, password2: string) => {
+    try {
+      setLoading(true)
+      setError(null)
+
+      const response = await fetch(`${API_BASE_URL}/users/reset_password/`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ token, password, password2 }),
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}))
+        throw new Error(errorData.error || errorData.token || errorData.password || 'Failed to reset password')
+      }
+
+      const data = await response.json()
+      return data
+    } catch (error) {
+      console.error('Reset password error:', error)
+      throw error
+    } finally {
+      setLoading(false)
+    }
+  }
+
   return {
     user,
     token,
@@ -164,5 +220,7 @@ export function useAuth() {
     signIn,
     signOut: handleSignOut,
     register,
+    forgotPassword,
+    resetPassword,
   }
 }

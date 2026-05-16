@@ -144,7 +144,7 @@ export default function RegisterPage() {
             )}
           </Link>
           <h1 className="text-3xl font-semibold mb-2">Create Account</h1>
-          <p className="text-muted-foreground">Join Delchris for the premium experience</p>
+          <p className="text-muted-foreground">Join Delx for the premium experience</p>
         </div>
 
 {/* Form */}
