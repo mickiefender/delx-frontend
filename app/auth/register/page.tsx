@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useAuth } from '@/hooks/use-auth'
@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { toast } from 'sonner'
 import { Mail, Lock, User, Phone, Loader, AlertCircle } from 'lucide-react'
+import { fetchPublicSettings } from '@/lib/services/settings'
 
 export default function RegisterPage() {
   const router = useRouter()
@@ -23,6 +24,37 @@ export default function RegisterPage() {
   })
   const [isLoading, setIsLoading] = useState(false)
   const [errors, setErrors] = useState<Record<string, string>>({})
+  const [siteLogo, setSiteLogo] = useState<string | null>(null)
+
+  const toAbsoluteMediaUrl = (url?: string | null): string => {
+    if (!url) return ''
+    if (url.startsWith('http://') || url.startsWith('https://')) return url
+    const backendBase = (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api/v1').replace(/\/api\/v1\/?$/, '')
+    if (url.startsWith('/')) return `${backendBase}${url}`
+    return `${backendBase}/${url}`
+  }
+
+  useEffect(() => {
+    let cancelled = false
+
+    const loadLogo = async () => {
+      try {
+        const settings = await fetchPublicSettings()
+        if (cancelled) return
+
+        const logo = (settings as any).site_logo as string | null | undefined
+        setSiteLogo(logo ? toAbsoluteMediaUrl(logo) : null)
+      } catch {
+        // fallback silently
+      }
+    }
+
+    void loadLogo()
+
+    return () => {
+      cancelled = true
+    }
+  }, [])
 
   // Redirect if already authenticated
   if (isAuthenticated) {
@@ -95,12 +127,21 @@ export default function RegisterPage() {
   return (
     <div className="min-h-screen bg-background flex items-center justify-center px-4">
       <div className="w-full max-w-md">
-        {/* Header */}
+{/* Header */}
         <div className="text-center mb-8">
           <Link href="/" className="inline-block">
-            <div className="w-12 h-12 bg-primary rounded-lg flex items-center justify-center text-primary-foreground font-bold text-xl mb-4">
-              D
-            </div>
+            {siteLogo ? (
+              <img
+                src={siteLogo}
+                alt="Delchris"
+                className="w-20 h-14 rounded-md  mx-auto mb-4"
+                loading="eager"
+              />
+            ) : (
+              <div className="w-12 h-12 bg-primary rounded-lg flex items-center justify-center text-primary-foreground font-bold text-xl mb-4 mx-auto">
+                D
+              </div>
+            )}
           </Link>
           <h1 className="text-3xl font-semibold mb-2">Create Account</h1>
           <p className="text-muted-foreground">Join Delchris for the premium experience</p>
