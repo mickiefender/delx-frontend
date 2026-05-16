@@ -53,7 +53,7 @@ export function useAuth() {
       setLoading(true)
       setError(null)
 
-      const response = await fetch(`${API_BASE_URL}/users/login/`, {
+      const response = await fetch(`${API_BASE_URL}/users/login`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -102,7 +102,7 @@ export function useAuth() {
       // Call logout endpoint if token exists
       if (token) {
         try {
-          await fetch(`${API_BASE_URL}/users/logout/`, {
+          await fetch(`${API_BASE_URL}/users/logout`, {
             method: 'POST',
             headers: {
               'Authorization': `Token ${token}`,
