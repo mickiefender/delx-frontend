@@ -21,8 +21,10 @@ export async function POST(request: NextRequest) {
     }
 
     // 1) Create the Django order (DB persistence) before initializing Paystack
-    const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
-    const ordersUrl = `${apiBaseUrl}/api/v1/orders/`
+    // Normalize NEXT_PUBLIC_API_URL to always point at ".../api/v1"
+    const apiBaseUrl =
+      (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api/v1').replace(/\/api\/v1\/?$/, '/api/v1')
+    const ordersUrl = `${apiBaseUrl}/orders/`
 
     const createOrderPayload: Record<string, unknown> = {
       ...(orderPayload || {}),
