@@ -560,10 +560,10 @@ export default function ProductDetailPage({ params }: { params: Promise<{ produc
                     <p className="text-muted-foreground mb-5">No description available for this product.</p>
                   )}
 
-                  {/* Quantity + CTA */}
+{/* Quantity + CTA */}
                   <div className="mb-5">
-                    <div className="flex items-center justify-between gap-4">
-                      <div className="flex items-center border border-border rounded-lg">
+                    <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 sm:gap-4">
+                      <div className="flex items-center justify-between sm:justify-none border border-border rounded-lg">
                         <button
                           type="button"
                           onClick={() => setQuantity(Math.max(1, quantity - 1))}
@@ -583,13 +583,15 @@ export default function ProductDetailPage({ params }: { params: Promise<{ produc
                         </button>
                       </div>
 
-<Button onClick={handleAddToCart} variant="outline" className="flex-1" size="lg" disabled={!inStock}>
-                        <ShoppingBag className="w-5 h-5 mr-2" />
-                        Add to Cart
-                      </Button>
-                      <Button onClick={handleBuyNow} className="flex-1" size="lg" disabled={!inStock}>
-                        Buy Now
-                      </Button>
+                      <div className="flex flex-col sm:flex-row gap-3 sm:gap-2">
+                        <Button onClick={handleAddToCart} variant="outline" className="flex-1" size="lg" disabled={!inStock}>
+                          <ShoppingBag className="w-5 h-5 mr-2" />
+                          Add to Cart
+                        </Button>
+                        <Button onClick={handleBuyNow} className="flex-1" size="lg" disabled={!inStock}>
+                          Buy Now
+                        </Button>
+                      </div>
                     </div>
                   </div>
 
