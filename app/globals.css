@@ -138,8 +138,17 @@
   --admin-muted: oklch(0.18 0.03 260);
   --admin-muted-foreground: oklch(0.65 0.02 70);
 
-  /* Admin Border */
+/* Admin Border */
   --admin-border: oklch(0.25 0.04 260);
+
+  /* Admin Mobile Sidebar - Professional Dark Theme */
+  --sidebar-mobile: oklch(0.12 0.03 260);
+  --sidebar-mobile-foreground: oklch(0.92 0.01 70);
+  --sidebar-mobile-primary: oklch(0.55 0.15 45);
+  --sidebar-mobile-primary-foreground: oklch(0.98 0.01 70);
+  --sidebar-mobile-accent: oklch(0.22 0.05 260);
+  --sidebar-mobile-accent-foreground: oklch(0.95 0.01 70);
+  --sidebar-mobile-border: oklch(0.25 0.04 260);
 }
 
 @theme inline {
@@ -182,7 +191,7 @@
   --color-sidebar-border: var(--sidebar-border);
 --color-sidebar-ring: var(--sidebar-ring);
 
-  /* Admin Dashboard Premium Dark Theme */
+/* Admin Dashboard Premium Dark Theme */
   --color-admin-background: var(--admin-background);
   --color-admin-foreground: var(--admin-foreground);
   --color-admin-card: var(--admin-card);
@@ -192,6 +201,15 @@
   --color-admin-muted: var(--admin-muted);
   --color-admin-muted-foreground: var(--admin-muted-foreground);
   --color-admin-border: var(--admin-border);
+
+  /* Admin Mobile Sidebar */
+  --color-sidebar-mobile: var(--sidebar-mobile);
+  --color-sidebar-mobile-foreground: var(--sidebar-mobile-foreground);
+  --color-sidebar-mobile-primary: var(--sidebar-mobile-primary);
+  --color-sidebar-mobile-primary-foreground: var(--sidebar-mobile-primary-foreground);
+  --color-sidebar-mobile-accent: var(--sidebar-mobile-accent);
+  --color-sidebar-mobile-accent-foreground: var(--sidebar-mobile-accent-foreground);
+  --color-sidebar-mobile-border: var(--sidebar-mobile-border);
 }
 
 @layer base {

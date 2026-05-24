@@ -107,6 +107,11 @@ export default function AdminOrdersPage() {
   const [searchTerm, setSearchTerm] = useState('')
   const [statusFilter, setStatusFilter] = useState('All')
 
+  // Pagination state
+  const [currentPage, setCurrentPage] = useState(1)
+  const [totalCount, setTotalCount] = useState(0)
+  const pageSize = 20
+
   const token = useAuthStore.getState().token
 
   const headers = useMemo(() => {
@@ -124,7 +129,7 @@ export default function AdminOrdersPage() {
     setDetailError(null)
   }
 
-  useEffect(() => {
+useEffect(() => {
     let cancelled = false
 
     async function load() {
@@ -134,15 +139,36 @@ export default function AdminOrdersPage() {
       try {
         if (!headers) throw new Error('Admin token not found. Please log in again.')
 
-        const res = await fetch(`${API_BASE_URL}/orders/`, { headers })
+        // Build URL with pagination params
+        const baseUrl = `${API_BASE_URL}/orders/`
+        const url = new URL(baseUrl)
+        url.searchParams.set('page', String(currentPage))
+        url.searchParams.set('page_size', String(pageSize))
+
+        const res = await fetch(url.toString(), { headers })
         const json = await res.json()
 
         if (!res.ok) {
           throw new Error((json as any)?.error || `Failed to fetch orders (${res.status})`)
         }
 
-        const list = Array.isArray(json) ? (json as AdminOrder[]) : ((json as any).results as AdminOrder[]) || []
-        if (!cancelled) setOrders(list)
+        // Handle both paginated and non-paginated responses
+        const data = json
+        if (Array.isArray(data)) {
+          // Non-paginated response (legacy)
+          if (!cancelled) {
+            setOrders(data as AdminOrder[])
+            setTotalCount(data.length)
+          }
+        } else if (data.results) {
+          // Paginated response
+          if (!cancelled) {
+            setOrders(data.results as AdminOrder[])
+            setTotalCount(data.count || 0)
+          }
+        } else {
+          if (!cancelled) setOrders([])
+        }
       } catch (e) {
         if (cancelled) return
         setError(e instanceof Error ? e.message : 'Failed to load orders')
@@ -155,9 +181,9 @@ export default function AdminOrdersPage() {
     return () => {
       cancelled = true
     }
-  }, [headers])
+  }, [headers, currentPage, pageSize])
 
-  const filteredOrders = useMemo(() => {
+const filteredOrders = useMemo(() => {
     const q = searchTerm.trim().toLowerCase()
 
     return orders.filter((order) => {
@@ -175,6 +201,11 @@ export default function AdminOrdersPage() {
       return matchesSearch && matchesStatus
     })
   }, [orders, searchTerm, statusFilter])
+
+  // Reset to page 1 when search or filter changes
+  useEffect(() => {
+    setCurrentPage(1)
+  }, [searchTerm, statusFilter])
 
   const openOrderDetail = async (order: AdminOrder) => {
     if (!headers) return
@@ -323,10 +354,35 @@ export default function AdminOrdersPage() {
             </select>
           </div>
 
-          <div className="flex items-center">
+<div className="flex items-center gap-4">
             <span className="text-sm text-muted-foreground">
-              {filteredOrders.length} order{filteredOrders.length === 1 ? '' : 's'}
+              {totalCount > 0
+                ? `${(currentPage - 1) * pageSize + 1}-${Math.min(currentPage * pageSize, totalCount)} of ${totalCount} orders`
+                : `${filteredOrders.length} order${filteredOrders.length === 1 ? '' : 's'}`}
             </span>
+
+            {/* Pagination controls */}
+            <div className="flex items-center gap-1">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                disabled={currentPage === 1 || loading}
+              >
+                Previous
+              </Button>
+              <span className="text-sm text-muted-foreground px-2">
+                Page {currentPage}
+              </span>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setCurrentPage((p) => p + 1)}
+                disabled={orders.length < pageSize || loading}
+              >
+                Next
+              </Button>
+            </div>
           </div>
         </div>
       </Card>

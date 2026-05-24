@@ -175,25 +175,25 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     router.push('/auth/login')
   }
 
-  const SidebarContent = () => (
-    <div className="flex flex-col h-full">
+const SidebarContent = () => (
+    <div className="flex flex-col h-full bg-[oklch(0.12_0.03_260)]">
       {/* Logo */}
-      <div className="p-6 border-b border-sidebar-border">
+      <div className="p-6 border-b border-[oklch(0.25_0.04_260)]">
         <Link href="/admin" className="flex items-center gap-3">
-          <div className="flex items-center justify-center w-10 h-10 rounded-lg bg-sidebar-primary shadow-md overflow-hidden">
+          <div className="flex items-center justify-center w-10 h-10 rounded-lg bg-[oklch(0.55_0.15_45)] shadow-md overflow-hidden">
             {siteLogo ? (
               // eslint-disable-next-line @next/next/no-img-element
               <img
                 src={siteLogo}
                 alt="Delchris"
-                className="w-full h-full object-cover"
+                className="w-full h-full "
                 loading="eager"
               />
             ) : (
-              <span className="text-sidebar-primary-foreground font-bold text-lg">📊</span>
+              <span className="text-[oklch(0.98_0.01_70)] font-bold text-lg">📊</span>
             )}
           </div>
-          <span className="font-bold text-sidebar-foreground text-lg">Admin</span>
+          <span className="font-bold text-[oklch(0.92_0.01_70)] text-lg">Admin</span>
         </Link>
       </div>
 
@@ -204,7 +204,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             key={item.href}
             href={item.href}
             onClick={() => isMobile && setMobileSheetOpen(false)}
-            className="flex items-center gap-3 px-4 py-3 rounded-lg text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground transition-all duration-200 hover:shadow-md"
+            className="flex items-center gap-3 px-4 py-3 rounded-lg text-[oklch(0.92_0.01_70)] hover:bg-[oklch(0.22_0.05_260)] hover:text-[oklch(0.95_0.01_70)] transition-all duration-200"
           >
             <item.icon className="w-5 h-5 flex-shrink-0" />
             <span className="text-sm font-medium">{item.label}</span>
@@ -213,10 +213,10 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       </nav>
 
       {/* Footer */}
-      <div className="border-t border-sidebar-border p-3 space-y-2">
+      <div className="border-t border-[oklch(0.25_0.04_260)] p-3 space-y-2">
         <button
           onClick={handleLogout}
-          className="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground transition-all duration-200 text-sm font-medium hover:shadow-md"
+          className="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-[oklch(0.92_0.01_70)] hover:bg-[oklch(0.22_0.05_260)] hover:text-[oklch(0.95_0.01_70)] transition-all duration-200 text-sm font-medium"
         >
           <LogOut className="w-5 h-5 flex-shrink-0" />
           <span>Logout</span>
@@ -300,7 +300,10 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                     <Menu className="w-5 h-5" />
                   </button>
                 </SheetTrigger>
-                <SheetContent side="left" className="w-64 p-0">
+<SheetContent
+                  side="left"
+                  className="w-72 p-0 bg-[oklch(0.12_0.03_260)] border-r border-[oklch(0.25_0.04_260)]"
+                >
                   <SidebarContent />
                 </SheetContent>
               </Sheet>
