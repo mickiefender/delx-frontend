@@ -2,13 +2,14 @@
 
 import { useEffect, useMemo, useState, use } from 'react'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import { Header } from '@/components/layout/header'
 import { Footer } from '@/components/layout/footer'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { useCartStore } from '@/lib/store/cart'
-import { Star, Heart, Truck, Shield, ArrowLeft, Link as LinkIcon, Share2, Facebook, Twitter, Linkedin, MessageCircle } from 'lucide-react'
+import { Star, Heart, Truck, Shield, ArrowLeft, Link as LinkIcon, Share2, Facebook, Twitter, Linkedin, MessageCircle, ShoppingBag } from 'lucide-react'
 import { toast } from 'sonner'
 import { fetchStoreProductBySlug, ProductDetailItem, ProductImageItem } from '@/lib/services/products'
 import { HomeAdsSection } from '@/components/home/home-ads-section'
@@ -101,6 +102,7 @@ function ShareButton({ label, icon, href }: ShareButtonProps) {
 export default function ProductDetailPage({ params }: { params: Promise<{ productId: string }> }) {
   const resolvedParams = use(params)
   const slug = resolvedParams.productId
+  const router = useRouter()
 
   const { addItem } = useCartStore()
   const [quantity, setQuantity] = useState<number>(1)
@@ -146,7 +148,7 @@ export default function ProductDetailPage({ params }: { params: Promise<{ produc
       } finally {
         setLoading(false)
       }
-    }
+}
 
     loadProduct()
   }, [slug])
@@ -161,7 +163,7 @@ export default function ProductDetailPage({ params }: { params: Promise<{ produc
 
       try {
         const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api/v1'
-        const res = await fetch(`${API_BASE_URL}/products/best_sellers/`)
+        const res = await fetch(`${API_BASE_URL}/products/related/?product_id=${product?.id}`)
         if (!res.ok) {
           const text = await res.text()
           throw new Error(text || `Failed to load related products (${res.status})`)
@@ -174,11 +176,7 @@ export default function ProductDetailPage({ params }: { params: Promise<{ produc
             ? json.results
             : []
 
-        const filtered = list
-          .filter((p) => String(p.id) !== String(product?.id))
-          .slice(0, 4)
-
-        if (!cancelled) setRelatedProducts(filtered)
+        if (!cancelled) setRelatedProducts(list)
       } catch (e) {
         if (!cancelled) {
           setRelatedError(e instanceof Error ? e.message : 'Failed to load related products')
@@ -190,8 +188,6 @@ export default function ProductDetailPage({ params }: { params: Promise<{ produc
     }
 
     async function loadReviews() {
-      setReviewsLoading(true)
-      setReviewsError(null)
       setReviewsLoading(true)
       setReviewsError(null)
 
@@ -206,6 +202,7 @@ export default function ProductDetailPage({ params }: { params: Promise<{ produc
 
         const json = await res.json()
         const list: ProductReview[] = Array.isArray(json) ? json : Array.isArray(json?.results) ? json.results : []
+
         if (!cancelled) setReviews(list)
       } catch (e) {
         if (!cancelled) {
@@ -217,7 +214,9 @@ export default function ProductDetailPage({ params }: { params: Promise<{ produc
       }
     }
 
+    loadRelated()
     loadReviews()
+
     return () => {
       cancelled = true
     }
@@ -235,6 +234,21 @@ export default function ProductDetailPage({ params }: { params: Promise<{ produc
       image: product.image || '🛍️',
     })
     toast.success(`${quantity} item(s) added to cart!`)
+  }
+
+  const handleBuyNow = () => {
+    if (!product) return
+    const price = Number(product.price)
+    addItem({
+      id: `${product.id}`,
+      productId: `${product.id}`,
+      name: product.name,
+      price,
+      quantity,
+      image: product.image || '🛍️',
+    })
+    toast.success(`${quantity} item(s) added! Proceeding to checkout...`)
+    router.push('/checkout')
   }
 
   const handleSubmitReview = async () => {
@@ -569,8 +583,12 @@ export default function ProductDetailPage({ params }: { params: Promise<{ produc
                         </button>
                       </div>
 
-                      <Button onClick={handleAddToCart} className="flex-1" size="lg" disabled={!inStock}>
+<Button onClick={handleAddToCart} variant="outline" className="flex-1" size="lg" disabled={!inStock}>
+                        <ShoppingBag className="w-5 h-5 mr-2" />
                         Add to Cart
+                      </Button>
+                      <Button onClick={handleBuyNow} className="flex-1" size="lg" disabled={!inStock}>
+                        Buy Now
                       </Button>
                     </div>
                   </div>

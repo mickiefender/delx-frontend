@@ -10,17 +10,16 @@ const geist = Geist({ subsets: ["latin"] });
 const geistMono = Geist_Mono({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: 'Delchris - Premium Fashion & Lifestyle',
+  title: 'Delx - Premium E-cmomerce in Ghana & West Africa',
   description: 'Discover premium fashion, lifestyle products, and luxury goods from Delchris. Fast shipping across Ghana and West Africa.',
-  generator: 'v0.app',
-  keywords: 'fashion, luxury, ecommerce, Ghana, West Africa, shopping',
+  keywords: 'fashion, luxury, ecommerce, Ghana, West Africa, shopping, goods, lifestyle, Delchris, online store, premium products,webshop, clothing, accessories, home decor, beauty products, shoes, footwear, jewelry, watches, electronic gadgets, fast shipping, customer service, secure payment, exclusive deals, discounts',
   openGraph: {
     type: 'website',
     locale: 'en_US',
-    url: 'https://delchris.com',
-    siteName: 'Delchris',
-    title: 'Delchris - Premium Fashion & Lifestyle',
-    description: 'Discover premium fashion and luxury goods',
+    url: 'https://delx.shop',
+    siteName: 'Delx',
+    title: 'Delx - Premium E-commerce in Ghana & West Africa',
+    description: 'Discover premium fashion, lifestyle products, and luxury goods from Delchris. Fast shipping across Ghana and West Africa.',
     images: [
       {
         url: '/og-image.png',

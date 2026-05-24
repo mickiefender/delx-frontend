@@ -4,8 +4,18 @@ import { useEffect, useMemo, useState } from 'react'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Eye, Search, Download, Filter, X } from 'lucide-react'
+import { Eye, Search, Download, Filter, X, Trash2 } from 'lucide-react'
 import { useAuthStore } from '@/lib/store/auth'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog'
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api/v1'
 
@@ -235,6 +245,42 @@ export default function AdminOrdersPage() {
     }
   }
 
+  const deleteSelectedOrder = async () => {
+    if (!headers || !selectedOrder) return
+
+    setIsDetailLoading(true)
+    setDetailError(null)
+
+    try {
+      const res = await fetch(`${API_BASE_URL}/orders/${selectedOrder.id}/`, {
+        method: 'DELETE',
+        headers,
+      })
+
+      if (!res.ok && res.status !== 204) {
+        const text = await res.text()
+        throw new Error(text || `Failed to delete order (${res.status})`)
+      }
+
+      closeModal()
+      await (async () => {
+        const refresh = await fetch(`${API_BASE_URL}/orders/`, { headers })
+        const json = await refresh.json()
+
+        if (!refresh.ok) {
+          throw new Error((json as any)?.error || `Failed to refresh orders (${refresh.status})`)
+        }
+
+        const list = Array.isArray(json) ? (json as AdminOrder[]) : ((json as any).results as AdminOrder[]) || []
+        setOrders(list)
+      })()
+    } catch (e) {
+      setDetailError(e instanceof Error ? e.message : 'Failed to delete order')
+    } finally {
+      setIsDetailLoading(false)
+    }
+  }
+
   return (
     <div className="p-0">
       <div className="flex items-center justify-between mb-8">
@@ -387,16 +433,39 @@ export default function AdminOrdersPage() {
       {selectedOrder || isDetailLoading || detailError ? (
         <div className="fixed inset-0 z-50 bg-black/40 flex items-center justify-center p-4">
           <div className="bg-card border border-border rounded-lg w-full max-w-3xl max-h-[85vh] overflow-y-auto">
-            <div className="p-4 flex items-start justify-between border-b border-border">
+            <div className="p-4 flex items-start justify-between border-b border-border gap-3">
               <div>
                 <h2 className="text-xl font-bold text-foreground">Order Details</h2>
                 <p className="text-muted-foreground mt-1">#{selectedOrder?.order_id || ''}</p>
               </div>
 
-              <Button variant="ghost" size="sm" onClick={closeModal} className="gap-2">
-                <X className="w-4 h-4" />
-                Close
-              </Button>
+              <div className="flex items-center gap-2">
+                <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                    <Button variant="destructive" size="sm" className="gap-2" disabled={isDetailLoading}>
+                      <Trash2 className="w-4 h-4" />
+                      Delete
+                    </Button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent>
+                    <AlertDialogTitle>Delete Order</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      Are you sure you want to delete order "{selectedOrder?.order_id}"? This action cannot be undone.
+                    </AlertDialogDescription>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel>Cancel</AlertDialogCancel>
+                      <AlertDialogAction onClick={deleteSelectedOrder} disabled={isDetailLoading}>
+                        {isDetailLoading ? 'Deleting...' : 'Delete'}
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
+
+                <Button variant="ghost" size="sm" onClick={closeModal} className="gap-2">
+                  <X className="w-4 h-4" />
+                  Close
+                </Button>
+              </div>
             </div>
 
             <div className="p-4">

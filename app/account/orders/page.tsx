@@ -66,7 +66,7 @@ export default function OrdersPage() {
     return { Authorization: `Token ${token}` }
   }, [token])
 
-  useEffect(() => {
+useEffect(() => {
     let cancelled = false
 
     async function load() {
@@ -75,8 +75,33 @@ export default function OrdersPage() {
 
       try {
         const guestId = token ? null : window.localStorage.getItem('guest_id')
+        const storedReference = token ? null : window.localStorage.getItem('paystack_reference')
+        
+        // FIRST: Verify any pending payments if we have a stored reference
+        // This handles cases where user completed payment but didn't visit success page
+        if (!token && storedReference) {
+          try {
+            const verifyRes = await fetch(`${API_BASE_URL}/payments/verify/`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ reference: storedReference }),
+            })
+            if (verifyRes.ok) {
+              console.log('Payment verified on orders page load')
+            }
+          } catch (e) {
+            console.warn('Payment verification on orders page failed:', e)
+          }
+        }
+
         const url = new URL(`${API_BASE_URL}/orders/`)
         if (!token && guestId) url.searchParams.set('guest_id', guestId)
+        
+        // Also try to fetch by paystack_reference if stored
+        // This handles cases where user completed payment but didn't visit success page
+        if (!token && storedReference) {
+          url.searchParams.set('paystack_reference', storedReference)
+        }
 
         const res = await fetch(url.toString(), { headers: headers ?? undefined })
         const json = await res.json()

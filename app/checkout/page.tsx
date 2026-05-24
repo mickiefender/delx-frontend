@@ -150,7 +150,7 @@ export default function CheckoutPage() {
 
     try {
       // Use guestId when user is not signed in
-      const authToken = typeof window !== 'undefined' ? window.localStorage.getItem('auth_token') : null
+const authToken = typeof window !== 'undefined' ? window.localStorage.getItem('auth_token') : null
       const isSignedIn = !!authToken
 
       const ensureGuestId = () => {
@@ -175,9 +175,8 @@ export default function CheckoutPage() {
 
       // Map cart items -> backend OrderItem shape.
       // Backend requires: product_name, sku, price, quantity, subtotal, variant_attributes.
+      // Note: product field is omitted - the backend will leave it as NULL for guest orders
       const itemsPayload = items.map((item) => ({
-        id: undefined,
-        product: undefined,
         product_name: item.name,
         product_image: item.image || '',
         sku: item.variantId ? `${item.productId}-${item.variantId}` : item.productId,
@@ -229,6 +228,9 @@ export default function CheckoutPage() {
       if (!initResponse.success || !initResponse.data) {
         throw new Error(initResponse.error || 'Failed to initialize payment')
       }
+
+// Store reference in localStorage so order can be found even if user doesn't visit success page
+      window.localStorage.setItem('paystack_reference', initResponse.data.reference)
 
       initializePayment({
         orderId,

@@ -13,7 +13,11 @@ export async function POST(request: NextRequest) {
     const looksJson = text.trim().startsWith('{') || text.trim().startsWith('[')
 
     if (looksJson) {
-      return new NextResponse(JSON.parse(text), { status: initRes.status })
+      // Pass the JSON string directly, not the parsed object
+      return new NextResponse(text, {
+        status: initRes.status,
+        headers: { 'Content-Type': 'application/json' },
+      })
     }
 
     return NextResponse.json(

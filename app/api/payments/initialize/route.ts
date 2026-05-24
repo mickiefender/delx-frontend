@@ -20,24 +20,40 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 })
     }
 
-    // 1) Create the Django order (DB persistence) before initializing Paystack
+// 1) Create the Django order (DB persistence) before initializing Paystack
     // Normalize NEXT_PUBLIC_API_URL to always point at ".../api/v1"
     const apiBaseUrl =
       (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api/v1').replace(/\/api\/v1\/?$/, '/api/v1')
     const ordersUrl = `${apiBaseUrl}/orders/`
+
+// Get auth token from request headers (sent by frontend client) or fallback to cookie
+    const authToken = request.headers.get('authorization')?.replace('Bearer ', '') 
+      || request.cookies.get('auth_token')?.value
+      || null
+
+    // Build request headers
+    const orderRequestHeaders: Record<string, string> = {
+      'Content-Type': 'application/json',
+    }
+    
+    // Add auth token if available (for authenticated users)
+    if (authToken) {
+      orderRequestHeaders['Authorization'] = `Token ${authToken}`
+    }
 
     const createOrderPayload: Record<string, unknown> = {
       ...(orderPayload || {}),
       // ensure the payment reference maps to the order we create
       // NOTE: for this to work, backend must accept `order_id` in OrderCreateSerializer
       order_id: orderId,
+      // Also set paystack_reference so we can lookup order by reference later
+      // This should match what we send to Paystack
+      paystack_reference: orderId,
     }
 
     const createOrderRes = await fetch(ordersUrl, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      headers: orderRequestHeaders,
       body: JSON.stringify(createOrderPayload),
     })
 
@@ -70,6 +86,10 @@ export async function POST(request: NextRequest) {
       )
     }
 
+// Build the callback URL for Paystack redirect
+    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'
+    const callbackUrl = `${siteUrl}/api/payments/callback`
+    
     // Call Paystack API to initialize payment
     const paystackResponse = await fetch('https://api.paystack.co/transaction/initialize', {
       method: 'POST',
@@ -81,16 +101,18 @@ export async function POST(request: NextRequest) {
         email,
         amount: amountInKobo,
         reference: paystackReference,
+        callback_url: callbackUrl,
         metadata: {
           phone,
           payment_method: paymentMethod,
           mobile_money_provider: mobileMoneyProvider || null,
+          order_id: orderId,
         },
         channels: getPaymentChannels(paymentMethod, mobileMoneyProvider),
       }),
     })
 
-    const paystackText = await paystackResponse.text()
+const paystackText = await paystackResponse.text()
     const paystackLooksJson =
       paystackText.trim().startsWith('{') || paystackText.trim().startsWith('[')
 
