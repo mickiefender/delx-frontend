@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation'
 import { useAuth } from '@/hooks/use-auth'
 import { AdminGuard } from '@/components/admin-guard'
 import { Button } from '@/components/ui/button'
+import { Badge } from '@/components/ui/badge'
 import { useIsMobile } from '@/hooks/use-mobile'
 import {
   LayoutDashboard,
@@ -26,6 +27,7 @@ import {
 } from 'lucide-react'
 import { useAuthStore } from '@/lib/store/auth'
 import { fetchPublicSettings, type SiteSettingsPublic } from '@/lib/services/settings'
+import { fetchNotificationCounts, type NotificationCounts } from '@/lib/services/analytics'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -40,17 +42,24 @@ import {
   SheetTrigger,
 } from '@/components/ui/sheet'
 
-const navigationItems = [
+interface NavItem {
+  label: string
+  href: string
+  icon: React.ComponentType<{ className?: string }>
+  badge?: number | null
+}
+
+const buildNavigationItems = (counts: NotificationCounts): NavItem[] => [
   { label: 'Dashboard', href: '/admin', icon: LayoutDashboard },
   { label: 'Products', href: '/admin/products', icon: Package },
-  { label: 'Orders', href: '/admin/orders', icon: ShoppingCart },
+  { label: 'Orders', href: '/admin/orders', icon: ShoppingCart, badge: counts.new_orders_count },
   { label: 'Attributes', href: '/admin/attributes', icon: Sliders },
   { label: 'Hero Banners', href: '/admin/hero-banners', icon: Image },
   { label: 'Home Ads', href: '/admin/home-ads', icon: Image },
   { label: 'Categories', href: '/admin/categories', icon: Tags },
   { label: 'Brands', href: '/admin/brands', icon: Tags },
   { label: 'Customers', href: '/admin/customers', icon: Users },
-  { label: 'Analytics', href: '/admin/analytics', icon: BarChart3 },
+  { label: 'Analytics', href: '/admin/analytics', icon: BarChart3, badge: counts.recent_analytics_count },
   { label: 'Settings', href: '/admin/settings', icon: Settings },
 ]
 
@@ -90,8 +99,17 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const [recentOrders, setRecentOrders] = useState<DashboardRecentOrdersResponse['data']>([])
   const [notificationsLoading, setNotificationsLoading] = useState(false)
   const [notificationsError, setNotificationsError] = useState<string | null>(null)
+  const [notificationCounts, setNotificationCounts] = useState<NotificationCounts>({
+    new_orders_count: 0,
+    recent_analytics_count: 0,
+  })
 
   const [siteLogo, setSiteLogo] = useState<string | null>(null)
+
+  const navigationItems = useMemo(
+    () => buildNavigationItems(notificationCounts),
+    [notificationCounts]
+  )
 
   const fetchNotifications = async () => {
     const token = useAuthStore.getState().token
@@ -101,6 +119,21 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     setNotificationsError(null)
 
     try {
+      // Fetch notification counts for badge counts
+      const countsRes = await fetch(`${API_BASE_URL}/analytics/dashboard/notification-counts/`, {
+        method: 'GET',
+        headers: { Authorization: `Token ${token}` },
+      })
+
+      if (countsRes.ok) {
+        const countsData = await countsRes.json()
+        setNotificationCounts({
+          new_orders_count: countsData.new_orders_count ?? 0,
+          recent_analytics_count: countsData.recent_analytics_count ?? 0,
+        })
+      }
+
+      // Also fetch recent orders for the dropdown
       const res = await fetch(`${API_BASE_URL}/analytics/dashboard/recent-orders/`, {
         method: 'GET',
         headers: { Authorization: `Token ${token}` },
@@ -197,17 +230,24 @@ const SidebarContent = () => (
         </Link>
       </div>
 
-      {/* Navigation */}
+{/* Navigation */}
       <nav className="flex-1 overflow-y-auto px-3 py-6 space-y-2">
-        {navigationItems.map((item) => (
+        {navigationItems.map((item: NavItem) => (
           <Link
             key={item.href}
             href={item.href}
             onClick={() => isMobile && setMobileSheetOpen(false)}
-            className="flex items-center gap-3 px-4 py-3 rounded-lg text-[oklch(0.92_0.01_70)] hover:bg-[oklch(0.22_0.05_260)] hover:text-[oklch(0.95_0.01_70)] transition-all duration-200"
+            className="flex items-center justify-between gap-3 px-4 py-3 rounded-lg text-[oklch(0.92_0.01_70)] hover:bg-[oklch(0.22_0.05_260)] hover:text-[oklch(0.95_0.01_70)] transition-all duration-200"
           >
-            <item.icon className="w-5 h-5 flex-shrink-0" />
-            <span className="text-sm font-medium">{item.label}</span>
+            <div className="flex items-center gap-3">
+              <item.icon className="w-5 h-5 flex-shrink-0" />
+              <span className="text-sm font-medium">{item.label}</span>
+            </div>
+            {item.badge !== null && item.badge !== undefined && item.badge > 0 && (
+              <Badge variant="destructive" className="text-[10px] px-1.5 py-0.5 min-w-[1.25rem] justify-center">
+                {item.badge > 99 ? '99+' : item.badge}
+              </Badge>
+            )}
           </Link>
         ))}
       </nav>
@@ -256,16 +296,23 @@ const SidebarContent = () => (
               </Link>
             </div>
 
-            {/* Navigation */}
+{/* Navigation */}
             <nav className="flex-1 overflow-y-auto px-3 py-6 space-y-2">
-              {navigationItems.map((item) => (
+              {navigationItems.map((item: NavItem) => (
                 <Link
                   key={item.href}
                   href={item.href}
-                  className="flex items-center gap-3 px-4 py-3 rounded-lg text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground transition-all duration-200 hover:shadow-md"
+                  className="flex items-center justify-between gap-3 px-4 py-3 rounded-lg text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground transition-all duration-200 hover:shadow-md"
                 >
-                  <item.icon className="w-5 h-5 flex-shrink-0" />
-                  {sidebarOpen && <span className="text-sm font-medium">{item.label}</span>}
+                  <div className="flex items-center gap-3">
+                    <item.icon className="w-5 h-5 flex-shrink-0" />
+                    {sidebarOpen && <span className="text-sm font-medium">{item.label}</span>}
+                  </div>
+                  {sidebarOpen && item.badge !== null && item.badge !== undefined && item.badge > 0 && (
+                    <Badge variant="destructive" className="text-[10px] px-1.5 py-0.5 min-w-[1.25rem] justify-center">
+                      {item.badge > 99 ? '99+' : item.badge}
+                    </Badge>
+                  )}
                 </Link>
               ))}
             </nav>
@@ -350,16 +397,16 @@ const SidebarContent = () => (
               </Button>
             </div>
 
-            <DropdownMenu>
+<DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <button
                   type="button"
-                  className="relative p-2 hover:bg-muted rounded-lg transition-colors"
+                  className="relative p-2 hover:bg-muted rounded-lg transition-all duration-200 hover:scale-105"
                   aria-label="View order notifications"
                 >
-                  <Bell className="w-5 h-5" />
+                  <Bell className="w-5 h-5 text-foreground" />
                   {unreadCount > 0 && (
-                    <span className="absolute -top-0.5 -right-0.5 bg-red-600 text-white text-[10px] font-bold rounded-full w-5 h-5 flex items-center justify-center border border-white">
+                    <span className="absolute -top-0.5 -right-0.5 bg-destructive text-destructive-foreground text-[10px] font-bold rounded-full w-5 h-5 flex items-center justify-center border-2 border-background animate-pulse">
                       {unreadCount > 99 ? '99+' : unreadCount}
                     </span>
                   )}
