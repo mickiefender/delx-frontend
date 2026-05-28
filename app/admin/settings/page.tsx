@@ -27,7 +27,7 @@ const colorInputHint = 'Paste a hex color like #2E7D32'
   free_shipping_threshold: '500',
   shipping_flat_rate: '15',
   local_shipping_rate: '10',
-  tax_rate: '0.15',
+  tax_rate: '0',
   return_policy_days: 7,
   return_policy_text: '',
   is_maintenance_mode: false,
@@ -74,10 +74,10 @@ export default function AdminSettingsPage() {
         instagram_url: data.instagram_url ?? '',
         twitter_url: data.twitter_url ?? '',
         whatsapp_number: data.whatsapp_number ?? '',
-        free_shipping_threshold: data.free_shipping_threshold ?? '500',
+free_shipping_threshold: data.free_shipping_threshold ?? '500',
         shipping_flat_rate: data.shipping_flat_rate ?? '15',
         local_shipping_rate: data.local_shipping_rate ?? '10',
-        tax_rate: data.tax_rate ?? '0.15',
+        tax_rate: data.tax_rate ?? '0',
         return_policy_days: data.return_policy_days ?? 7,
         return_policy_text: data.return_policy_text ?? '',
         is_maintenance_mode: data.is_maintenance_mode ?? false,
@@ -361,8 +361,8 @@ export default function AdminSettingsPage() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2 md:col-span-2">
                 <label className="text-sm text-muted-foreground">Tax rate (fraction)</label>
-                <Input
-                  value={settings.tax_rate ?? '0.15'}
+<Input
+                  value={settings.tax_rate ?? '0'}
                   onChange={(e) => setField('tax_rate', e.target.value)}
                   placeholder="e.g. 0.15 for 15%"
                 />

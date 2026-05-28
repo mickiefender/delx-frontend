@@ -68,7 +68,30 @@ export default function CheckoutPage() {
     }
   }, [])
 
-  // Step 1: Shipping Address
+// Ghana regions for shipping
+  const ghanaRegions = [
+    { value: 'accra', label: 'Accra', shipping: 50, freeThreshold: 1000 },
+    { value: 'tema', label: 'Tema', shipping: 100, freeThreshold: 1000 },
+    { value: 'kasoa', label: 'Kasoa', shipping: 100, freeThreshold: 1000 },
+    { value: 'greater-accra', label: 'Greater Accra', shipping: 100, freeThreshold: 2000 },
+    { value: 'ashanti', label: 'Ashanti', shipping: 100, freeThreshold: 2000 },
+    { value: 'western', label: 'Western', shipping: 100, freeThreshold: 2000 },
+    { value: 'central', label: 'Central', shipping: 100, freeThreshold: 2000 },
+    { value: 'eastern', label: 'Eastern', shipping: 100, freeThreshold: 2000 },
+    { value: 'volta', label: 'Volta', shipping: 100, freeThreshold: 2000 },
+    { value: 'northern', label: 'Northern', shipping: 100, freeThreshold: 2000 },
+    { value: 'upper-east', label: 'Upper East', shipping: 100, freeThreshold: 2000 },
+    { value: 'upper-west', label: 'Upper West', shipping: 100, freeThreshold: 2000 },
+    { value: 'brong-ahafo', label: 'Brong Ahafo', shipping: 100, freeThreshold: 2000 },
+    { value: 'oti', label: 'Oti', shipping: 100, freeThreshold: 2000 },
+    { value: 'western-north', label: 'Western North', shipping: 100, freeThreshold: 2000 },
+    { value: 'ahafo-ano', label: 'Ahafo Ano', shipping: 100, freeThreshold: 2000 },
+    { value: 'bono-east', label: 'Bono East', shipping: 100, freeThreshold: 2000 },
+    { value: 'savannah', label: 'Savannah', shipping: 100, freeThreshold: 2000 },
+    { value: 'north-east', label: 'North East', shipping: 100, freeThreshold: 2000 },
+  ]
+
+// Step 1: Shipping Address
   const [shippingAddress, setShippingAddress] = useState({
     firstName: '',
     lastName: '',
@@ -76,6 +99,7 @@ export default function CheckoutPage() {
     phone: '',
     address: '',
     city: '',
+    region: '',
     postalCode: '',
   })
 
@@ -83,22 +107,20 @@ export default function CheckoutPage() {
   const [useSameAddress, setUseSameAddress] = useState(true)
   const [billingAddress, setBillingAddress] = useState({ ...shippingAddress })
 
-  // Step 3: Payment Method
+// Step 3: Payment Method
   const [paymentMethod, setPaymentMethod] = useState('card')
 
   const subtotal = items.reduce((sum, item) => sum + item.price * item.quantity, 0)
 
-  const freeShippingThreshold = publicSettings ? Number(publicSettings.free_shipping_threshold) : 500
-  const standardShippingRate = publicSettings ? Number(publicSettings.shipping_flat_rate) : 15
-  const expressShippingRate = publicSettings ? Number(publicSettings.local_shipping_rate) : 10
-  const taxRate = publicSettings ? Number(publicSettings.tax_rate) : 0.15
+  // Find selected region data
+  const selectedRegion = ghanaRegions.find(r => r.value === shippingAddress.region)
+  const taxRate = publicSettings ? Number(publicSettings.tax_rate) : 0
 
-  const shipping =
-    subtotal >= freeShippingThreshold
-      ? 0
-      : shippingMethod === 'standard'
-        ? standardShippingRate
-        : expressShippingRate
+  // Calculate shipping based on region
+  const freeShippingThreshold = selectedRegion ? selectedRegion.freeThreshold : 2000
+  const regionShippingCost = selectedRegion ? selectedRegion.shipping : 100
+
+  const shipping = subtotal >= freeShippingThreshold ? 0 : regionShippingCost
 
   const tax = subtotal * taxRate
   const total = subtotal + shipping + tax
@@ -121,9 +143,9 @@ export default function CheckoutPage() {
     )
   }
 
-  const handleNextStep = () => {
+const handleNextStep = () => {
     if (step === 1) {
-      if (!shippingAddress.firstName || !shippingAddress.email || !shippingAddress.address) {
+      if (!shippingAddress.firstName || !shippingAddress.email || !shippingAddress.address || !shippingAddress.region) {
         toast.error('Please fill in all required fields')
         return
       }
@@ -201,8 +223,9 @@ const authToken = typeof window !== 'undefined' ? window.localStorage.getItem('a
           shipping_email: shippingAddress.email,
           shipping_phone: shippingAddress.phone,
           shipping_address: shippingAddress.address,
-          shipping_city: shippingAddress.city,
-          shipping_state: 'N/A',
+shipping_city: shippingAddress.city,
+          shipping_region: shippingAddress.region,
+          shipping_state: selectedRegion ? selectedRegion.label : 'N/A',
           shipping_postal_code: shippingAddress.postalCode || 'N/A',
           shipping_country: 'GH',
           // Billing
@@ -344,6 +367,22 @@ const authToken = typeof window !== 'undefined' ? window.localStorage.getItem('a
                           />
                         </div>
 
+<div>
+                          <label className="text-sm font-medium block mb-2">Region *</label>
+                          <select
+                            value={shippingAddress.region}
+                            onChange={(e) => setShippingAddress({ ...shippingAddress, region: e.target.value })}
+                            className="w-full p-2 border border-input rounded-md bg-background focus:outline-none focus:ring-2 focus:ring-primary"
+                          >
+                            <option value="">Select your region</option>
+                            {ghanaRegions.map((region) => (
+                              <option key={region.value} value={region.value}>
+                                {region.label}
+                              </option>
+                            ))}
+                          </select>
+                        </div>
+
                         <div className="grid grid-cols-2 gap-4">
                           <div>
                             <label className="text-sm font-medium block mb-2">City *</label>
@@ -399,41 +438,32 @@ const authToken = typeof window !== 'undefined' ? window.localStorage.getItem('a
                         </form>
                       )}
 
-                      {/* Shipping Method */}
+{/* Shipping Method */}
                       <div className="mt-8 pt-8 border-t border-border">
                         <h3 className="text-lg font-semibold mb-4">Shipping Method</h3>
-                        <div className="space-y-3">
-                          <label className="flex items-center gap-3 p-4 border border-border rounded-lg cursor-pointer hover:bg-muted">
-                            <input
-                              type="radio"
-                              name="shipping"
-                              value="standard"
-                              checked={shippingMethod === 'standard'}
-                              onChange={() => setShippingMethod('standard')}
-                              className="rounded-full"
-                            />
+                        <div className="p-4 border border-border rounded-lg">
+                          <div className="flex items-center justify-between">
                             <div>
                               <p className="font-medium">Standard Delivery</p>
                               <p className="text-xs text-muted-foreground">3-5 business days</p>
                             </div>
-                            <span className="ml-auto font-semibold">GHS {shippingMethod === 'standard' ? standardShippingRate : expressShippingRate}</span>
-                          </label>
-
-                          <label className="flex items-center gap-3 p-4 border border-border rounded-lg cursor-pointer hover:bg-muted">
-                            <input
-                              type="radio"
-                              name="shipping"
-                              value="express"
-                              checked={shippingMethod === 'express'}
-                              onChange={() => setShippingMethod('express')}
-                              className="rounded-full"
-                            />
-                            <div>
-                              <p className="font-medium">Express Delivery</p>
-                              <p className="text-xs text-muted-foreground">1-2 business days</p>
-                            </div>
-                            <span className="ml-auto font-semibold">GHS {shippingMethod === 'express' ? expressShippingRate : standardShippingRate}</span>
-                          </label>
+                            <span className="ml-auto font-semibold">
+                              {selectedRegion ? (
+                                subtotal >= selectedRegion.freeThreshold ? (
+                                  <span className="text-green-600">FREE</span>
+                                ) : (
+                                  `GHS ${selectedRegion.shipping}`
+                                )
+                              ) : (
+                                'GHS 100'
+                              )}
+                            </span>
+                          </div>
+                          {selectedRegion && subtotal < selectedRegion.freeThreshold && (
+                            <p className="text-xs text-muted-foreground mt-2">
+                              Free shipping on orders over GHS {selectedRegion.freeThreshold}
+                            </p>
+                          )}
                         </div>
                       </div>
                     </div>
