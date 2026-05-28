@@ -78,7 +78,24 @@ const getStatusStyles = (status: ProductStatus) => {
   return 'bg-red-100 text-red-800'
 }
 
+const LOW_STOCK_THRESHOLD = 10
+const CRITICAL_STOCK_THRESHOLD = 5
+
 const getStockLabel = (stock: number) => `${stock} units`
+
+const getStockStyles = (stock: number) => {
+  if (stock === 0) return 'bg-red-100 text-red-800'
+  if (stock <= CRITICAL_STOCK_THRESHOLD) return 'bg-red-100 text-red-800'
+  if (stock <= LOW_STOCK_THRESHOLD) return 'bg-yellow-100 text-yellow-800'
+  return 'bg-green-100 text-green-800'
+}
+
+const getStockWarningText = (stock: number) => {
+  if (stock === 0) return 'Out of Stock'
+  if (stock <= CRITICAL_STOCK_THRESHOLD) return 'Critical'
+  if (stock <= LOW_STOCK_THRESHOLD) return 'Low Stock'
+  return ''
+}
 
 export default function AdminProductsPage() {
   const [searchTerm, setSearchTerm] = useState('')
@@ -611,7 +628,14 @@ try {
                     <td className="py-3 px-4 text-sm text-foreground font-medium">{product.name}</td>
                     <td className="py-3 px-4 text-sm text-foreground">{product.category_name || '-'}</td>
                     <td className="py-3 px-4 text-sm font-semibold text-foreground">₵{product.price}</td>
-                    <td className="py-3 px-4 text-sm text-foreground">{getStockLabel(product.stock_quantity)}</td>
+<td className="py-3 px-4 text-sm">
+                      <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium ${getStockStyles(product.stock_quantity)}`}>
+                        {getStockLabel(product.stock_quantity)}
+                        {getStockWarningText(product.stock_quantity) && (
+                          <span className="w-1.5 h-1.5 rounded-full bg-current" />
+                        )}
+                      </span>
+                    </td>
                     <td className="py-3 px-4 text-sm">
                       <span className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusStyles(product.status || 'active')}`}>
                         {product.status || 'active'}

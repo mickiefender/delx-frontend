@@ -130,11 +130,16 @@ export default function ReturnsPage() {
                   Eligible for Return
                 </h3>
                 <ul className="space-y-2 text-sm text-muted-foreground">
-                  <li>• Unused items with tags attached</li>
-                  <li>• Items in original packaging</li>
-                  <li>• Items with all accessories included</li>
-                  <li>• Defective or damaged items</li>
-                  <li>• Wrong items delivered</li>
+                  <li>• Products delivered in a damaged, broken, or leaking condition.</li>
+                  <li>• Wrong item delivered compared to the order placed.</li>
+                  <li>• Expired products received at the time of delivery.</li>
+                  <li>• Missing items from a confirmed order.</li>
+                  <li>• Products with packaging defects affecting product quality or safety.</li>
+                  <li>• Orders canceled before dispatch or shipment.</li>
+                  <li>• Perishable items delivered in an unsafe or spoiled condition.</li>
+                  <li>• Items delivered significantly different from the product description on the website.</li>
+                  <li>• Duplicate payments or incorrect billing charges.</li>
+                  <li>• Products returned within the approved return window with proof of purchase.</li>
                 </ul>
               </div>
               <div>
@@ -143,11 +148,18 @@ export default function ReturnsPage() {
                   Not Eligible for Return
                 </h3>
                 <ul className="space-y-2 text-sm text-muted-foreground">
-                  <li>• Intimate apparel and swimwear</li>
-                  <li>• Earrings (hygiene reasons)</li>
-                  <li>• Opened beauty products</li>
-                  <li>• Items marked "Final Sale"</li>
-                  <li>• Items damaged by user error</li>
+                  <li>• Opened, consumed, or partially used edible products unless proven defective.</li>
+                  <li>• Returns requested after the stated return period has expired.</li>
+                  <li>• Damage caused by improper storage or handling after delivery.</li>
+                  <li>• Products without original packaging or labels.</li>
+                  <li>• Change-of-mind returns for perishable or food items.</li>
+                  <li>• Items purchased during clearance, promotional, or final-sale campaigns unless defective.</li>
+                  <li>• Products returned without proof of purchase or order confirmation.</li>
+                  <li>• Minor packaging dents or cosmetic issues that do not affect product quality.</li>
+                  <li>• Customized or specially prepared edible products.</li>
+                  <li>• Returns rejected due to hygiene and food safety regulations.</li>
+                  <li>• Incorrect delivery information provided by the customer resulting in spoilage or failed delivery.</li>
+                  <li>• Products that have been tampered with after delivery.</li>
                 </ul>
               </div>
             </div>

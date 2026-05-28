@@ -364,7 +364,9 @@ export function Footer() {
                 </Link>
               </div>
               <div className="text-center md:text-right">
-                <p className="opacity-90">Designed & Built with Excellence</p>
+               <a href="https://vertexblueprinttech.com" target="_blank" rel="noopener noreferrer">
+                  <p className="opacity-90">Designed & Built by Vertex Blueprint Technologies</p>
+                </a>
               </div>
             </div>
           </div>

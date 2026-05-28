@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Spinner } from '@/components/ui/spinner'
+import { ColorPicker } from '@/components/ui/color-picker'
 import { useToast } from '@/hooks/use-toast'
 import { fetchSettings, updateSettings, type SiteSettings, type UpdateSettingsPayload } from '@/lib/services/settings'
 
@@ -193,36 +194,33 @@ free_shipping_threshold: data.free_shipping_threshold ?? '500',
           <div className="space-y-4">
             <h2 className="text-xl font-semibold">Theme</h2>
 
-            <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-3 w-full">
+<div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 w-full">
                 <div className="space-y-1">
                   <label className="text-sm text-muted-foreground">Primary color</label>
-                  <Input
+                  <ColorPicker
                     value={settings.primary_color ?? ''}
-                    onChange={(e) => setField('primary_color', e.target.value)}
+                    onChange={(value) => setField('primary_color', value)}
                     placeholder="#2E7D32"
                   />
-                  <p className="text-xs text-muted-foreground">{colorInputHint}</p>
                 </div>
 
                 <div className="space-y-1">
                   <label className="text-sm text-muted-foreground">Secondary color</label>
-                  <Input
+                  <ColorPicker
                     value={settings.secondary_color ?? ''}
-                    onChange={(e) => setField('secondary_color', e.target.value)}
+                    onChange={(value) => setField('secondary_color', value)}
                     placeholder="#C62828"
                   />
-                  <p className="text-xs text-muted-foreground">{colorInputHint}</p>
                 </div>
 
                 <div className="space-y-1">
                   <label className="text-sm text-muted-foreground">Accent color</label>
-                  <Input
+                  <ColorPicker
                     value={settings.accent_color ?? ''}
-                    onChange={(e) => setField('accent_color', e.target.value)}
+                    onChange={(value) => setField('accent_color', value)}
                     placeholder="#F57C00"
                   />
-                  <p className="text-xs text-muted-foreground">{colorInputHint}</p>
                 </div>
               </div>
 

@@ -62,6 +62,23 @@ function formatGhs(amount: number): string {
   return `₵${amount.toFixed(2).replace(/\.00$/, '')}`
 }
 
+const LOW_STOCK_THRESHOLD = 10
+const CRITICAL_STOCK_THRESHOLD = 5
+
+const getStockWarningStyles = (stock: number) => {
+  if (stock === 0) return 'bg-red-100 text-red-800 border-red-300'
+  if (stock <= CRITICAL_STOCK_THRESHOLD) return 'bg-red-100 text-red-800 border-red-300'
+  if (stock <= LOW_STOCK_THRESHOLD) return 'bg-yellow-100 text-yellow-800 border-yellow-300'
+  return ''
+}
+
+const getStockWarningMessage = (stock: number) => {
+  if (stock === 0) return 'Out of Stock'
+  if (stock <= CRITICAL_STOCK_THRESHOLD) return `Only ${stock} left!`
+  if (stock <= LOW_STOCK_THRESHOLD) return `Low stock: ${stock} left`
+  return ''
+}
+
 const toAbsoluteMediaUrl = (url?: string | null): string => {
   if (!url) return ''
   if (url.startsWith('http://') || url.startsWith('https://')) return url
@@ -538,11 +555,18 @@ export default function ProductDetailPage({ params }: { params: Promise<{ produc
                         )}
                       </div>
 
-                      <div className="text-right">
+<div className="text-right">
                         <p className="text-xs text-muted-foreground mb-1">Stock Status</p>
-                        <p className={`font-medium ${inStock ? 'text-green-700' : 'text-red-700'}`}>
-                          {inStock ? 'In Stock' : 'Out of Stock'}
-                        </p>
+                        <div className="flex flex-col items-end gap-1">
+                          <p className={`font-medium ${inStock ? 'text-green-700' : 'text-red-700'}`}>
+                            {inStock ? 'In Stock' : 'Out of Stock'}
+                          </p>
+                          {getStockWarningStyles(product.stock_quantity) && (
+                            <span className={`text-xs px-2 py-0.5 rounded border ${getStockWarningStyles(product.stock_quantity)}`}>
+                              {getStockWarningMessage(product.stock_quantity)}
+                            </span>
+                          )}
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -601,13 +625,13 @@ export default function ProductDetailPage({ params }: { params: Promise<{ produc
                       <Truck className="w-5 h-5 text-muted-foreground" />
                       <div className="text-sm">
                         <p className="font-medium text-foreground">Free Shipping</p>
-                        <p className="text-xs text-muted-foreground">On orders over ₵100</p>
+                        <p className="text-xs text-muted-foreground">On orders over ₵1000</p>
                       </div>
                     </div>
                     <div className="flex items-center gap-3 p-3 border border-border rounded-lg">
                       <Shield className="w-5 h-5 text-muted-foreground" />
                       <div className="text-sm">
-                        <p className="font-medium text-foreground">30-Day Returns</p>
+                        <p className="font-medium text-foreground">7-Day Returns</p>
                         <p className="text-xs text-muted-foreground">Easy returns & refunds</p>
                       </div>
                     </div>
