@@ -208,23 +208,11 @@ export default function CartPage() {
                           <span>-GHS {couponDiscount.toFixed(2)}</span>
                         </div>
                       )}
-                      <div className="flex justify-between text-sm">
-                        <span className="text-muted-foreground">Shipping</span>
-                        <span>
-                          {shippingCost === 0 ? (
-                            <span className="text-accent">Free</span>
-                          ) : (
-                            `GHS ${shippingCost.toFixed(2)}`
-                          )}
-                        </span>
-                      </div>
-                      <div className="flex justify-between text-sm">
-                        <span className="text-muted-foreground">Tax (15%)</span>
-                        <span>GHS {taxAmount.toFixed(2)}</span>
-                      </div>
+                     
+                     
                       <div className="border-t border-border pt-3 flex justify-between font-semibold text-lg">
                         <span>Total</span>
-                        <span>GHS {totalPrice.toFixed(2)}</span>
+                          <span>GHS {subtotal.toFixed(2)}</span>
                       </div>
                     </div>
 
