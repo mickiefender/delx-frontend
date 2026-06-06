@@ -44,12 +44,12 @@ export function CategoriesSection() {
         <>
           {categories.length > 0 ? (
             <div className="w-full">
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-1 sm:gap-2 md:gap-3 lg:gap-4">
+              <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-7 gap-1 sm:gap-2">
                 {categories.map((category) => (
                   <Link key={category.id} href={`/products?category=${category.slug}`} className="group">
                     <div className="flex flex-col border border-gray-200 hover:border-gray-300 transition-colors duration-300 bg-white h-full">
-                      {/* Image Container */}
-                      <div className="w-full aspect-square bg-gray-50 flex items-center justify-center p-1 sm:p-1.5 overflow-hidden">
+                      {/* Image Container - Reduced size */}
+                      <div className="w-full h-16 sm:h-20 md:h-24 lg:h-28 bg-gray-50 flex items-center justify-center p-1 overflow-hidden">
                         {category.image ? (
                           // eslint-disable-next-line @next/next/no-img-element
                           <img
@@ -64,8 +64,8 @@ export function CategoriesSection() {
                       </div>
 
                       {/* Text Container - Below Image */}
-                      <div className="flex items-center justify-center text-center p-1 sm:p-1.5 min-h-9 flex-grow">
-                        <h3 className="font-medium text-[10px] sm:text-[11px] text-gray-900 line-clamp-2">
+                      <div className="flex items-center justify-center text-center p-1 sm:p-1.5 min-h-8 flex-grow">
+                        <h3 className="font-medium text-[9px] sm:text-[10px] text-gray-900 line-clamp-2">
                           {category.name}
                         </h3>
                       </div>

@@ -3,7 +3,7 @@
 import Image from 'next/image'
 import Link from 'next/link'
 
-const ANDROID_LINK = 'https://drive.google.com/file/d/1jUgJTKTqazKv67oP39i9V8GM4aWfRjlE/view?usp=drive_link'
+const ANDROID_LINK = 'https://drive.google.com/file/d/1jUgJTKTqazKv67oP39i9V8GM4aWfRjlE/view?usp=drive_linkfro'
 const IOS_LINK = 'https://apps.apple.com/us/app'
 
 export function MobileAppsDownloadSection() {
