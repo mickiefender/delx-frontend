@@ -4,11 +4,13 @@ import { useState, useEffect } from 'react'
 import { useAuth } from '@/hooks/use-auth'
 import { Header } from '@/components/layout/header'
 import { Footer } from '@/components/layout/footer'
+
 import { AccountSidebar } from '@/components/account/account-sidebar'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { toast } from 'sonner'
 import { Loader, Camera, User } from 'lucide-react'
+
 import { useRouter } from 'next/navigation'
 
 export default function ProfilePage() {
@@ -86,7 +88,7 @@ export default function ProfilePage() {
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
-              <AccountSidebar />
+
 
               {/* Main Content */}
               <div className="lg:col-span-3">

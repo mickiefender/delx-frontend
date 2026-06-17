@@ -8,6 +8,7 @@ import { AccountSidebar } from '@/components/account/account-sidebar'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Package, ArrowRight, Loader, ShoppingBag } from 'lucide-react'
+
 import { useRouter } from 'next/navigation'
 import { useAuthStore } from '@/lib/store/auth'
 
@@ -147,6 +148,7 @@ useEffect(() => {
       <Header />
       <main className="min-h-screen bg-background">
         <div className="px-4 sm:px-6 lg:px-8 py-12">
+
           <div className="max-w-6xl mx-auto">
             {/* Header */}
             <div className="mb-8">
@@ -155,9 +157,11 @@ useEffect(() => {
                   <ShoppingBag className="w-5 h-5 text-blue-500" />
                 </div>
                 <h1 className="text-2xl sm:text-3xl font-bold">My Orders</h1>
+
               </div>
               <p className="text-muted-foreground">Track and manage all your orders</p>
             </div>
+
 
             <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
               <AccountSidebar />
@@ -248,6 +252,7 @@ useEffect(() => {
                 )}
               </div>
             </div>
+
           </div>
         </div>
       </main>

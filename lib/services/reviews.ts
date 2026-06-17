@@ -18,7 +18,9 @@ export interface Review {
 
 export async function getFeaturedReviews(): Promise<Review[]> {
   try {
+
     const response = await fetch(`${API_BASE_URL}/reviews/featured/`, {
+
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',

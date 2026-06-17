@@ -177,7 +177,9 @@ export default function ContactPage() {
                     <div>
                       <h3 className="font-semibold mb-1">Call Us</h3>
                       <p className="text-sm text-muted-foreground">
+
                         +233 (0) 20 898 3545
+
                       </p>
                       <p className="text-sm text-muted-foreground">
                         Mon-Sat, 9AM - 6PM GMT
@@ -207,7 +209,10 @@ export default function ContactPage() {
                     <div>
                       <h3 className="font-semibold mb-1">Business Hours</h3>
                       <p className="text-sm text-muted-foreground">
+
                         24/7
+
+                      
                       </p>
                     </div>
                   </div>

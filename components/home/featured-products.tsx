@@ -218,7 +218,9 @@ function ProductCard({
             <img
               src={product.image}
               alt={product.name}
+
               className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+
             />
           ) : (
             <div className="text-5xl">🛍️</div>

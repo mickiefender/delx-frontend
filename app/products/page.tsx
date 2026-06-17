@@ -422,7 +422,9 @@ function ProductsContent() {
                               <img
                                 src={product.image}
                                 alt={product.name}
+
                                 className="w-full h-full object-cover"
+
                               />
                             ) : (
                               <div className="text-5xl">🛍️</div>
@@ -530,7 +532,9 @@ function ProductsContent() {
                               <img
                                 src={product.image}
                                 alt={product.name}
+
                                 className="w-full h-full object-cover"
+
                               />
                             ) : (
                               <div className="text-4xl">🛍️</div>
