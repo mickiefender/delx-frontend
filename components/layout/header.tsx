@@ -261,6 +261,12 @@ const { user, isAuthenticated, signOut, isAdmin, isAuthReady } =
                         <DropdownMenuSeparator />
 
                         <DropdownMenuItem asChild>
+                          <Link href="/account">
+                            Dashboard
+                          </Link>
+                        </DropdownMenuItem>
+
+                        <DropdownMenuItem asChild>
                           <Link href="/account/profile">
                             My Profile
                           </Link>
