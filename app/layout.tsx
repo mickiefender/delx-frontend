@@ -11,7 +11,14 @@ const geistMono = Geist_Mono({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
   title: 'Delx - Premium E-cmomerce in Ghana & West Africa',
-  description: 'Discover premium fashion, lifestyle products, and luxury goods from Delchris. Fast shipping across Ghana and West Africa.',
+  description: 'A premiuim ecommerce app where you can get everything you need from Delchris Africa Ltd. Fast shipping across Ghana and West Africa.',
+  authors: [{ name: 'Delchris Africa Ltd', url: 'https://delx.shop' }],
+  creator: 'Delchris Africa Ltd',
+  publisher: 'Delchris Africa Ltd',
+  applicationName: 'Delx',
+  themeColor: '#f4ede4',
+  colorScheme: 'light',
+  viewport: 'width=device-width, initial-scale=1, maximum-scale=5',
   keywords: 'fashion, luxury, ecommerce, Ghana, West Africa, shopping, goods, lifestyle, Delchris, online store, premium products,webshop, clothing, accessories, home decor, beauty products, shoes, footwear, jewelry, watches, electronic gadgets, fast shipping, customer service, secure payment, exclusive deals, discounts',
   openGraph: {
     type: 'website',
@@ -19,7 +26,7 @@ export const metadata: Metadata = {
     url: 'https://delx.shop',
     siteName: 'Delx',
     title: 'Delx - Premium E-commerce in Ghana & West Africa',
-    description: 'Discover premium fashion, lifestyle products, and luxury goods from Delchris. Fast shipping across Ghana and West Africa.',
+    description: 'A premiuim ecommerce app where you can get everything you need from Delchris Africa Ltd. Fast shipping across Ghana and West Africa.',
     images: [
       {
         url: '/og-image.png',
@@ -43,7 +50,7 @@ export const metadata: Metadata = {
         type: 'image/svg+xml',
       },
     ],
-    apple: '/apple-icon.png',
+    apple: '/icon-light-32x32.png',
   },
 }
 
